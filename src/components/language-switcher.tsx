@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 
 declare global {
@@ -23,13 +23,44 @@ const LANGUAGES = [
   { code: "zh-CN", label: "Chinês" },
 ];
 
+function getGoogTransCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)googtrans=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function clearGoogTransCookie() {
+  const expire = "expires=Thu, 01 Jan 1970 00:00:00 UTC";
+  document.cookie = `googtrans=; ${expire}; path=/;`;
+  document.cookie = `googtrans=; ${expire}; path=/; domain=${location.hostname}`;
+  document.cookie = `googtrans=; ${expire}; path=/; domain=.${location.hostname}`;
+}
+
+function setGoogTransCookie(targetCode: string) {
+  const value = `/pt/${targetCode}`;
+  document.cookie = `googtrans=${value}; path=/;`;
+  document.cookie = `googtrans=${value}; path=/; domain=${location.hostname}`;
+}
+
 /**
  * Tradução client-side via Google Translate (widget oficial). Não traduz o
  * conteúdo armazenado no banco — apenas a página renderizada, sob demanda,
- * para os 6 idiomas pedidos além do português original.
+ * para os idiomas selecionados além do português original.
+ *
+ * O Google Translate guarda o idioma escolhido num cookie (`googtrans`) que
+ * persiste entre recarregamentos. Lemos esse cookie ao montar o componente
+ * para o menu sempre refletir o idioma real da página (e não ficar "preso"
+ * em português visualmente enquanto o conteúdo está traduzido).
  */
 export function LanguageSwitcher() {
+  const [current, setCurrent] = useState("pt");
+
   useEffect(() => {
+    const cookie = getGoogTransCookie();
+    if (cookie) {
+      const target = cookie.split("/")[2];
+      if (target) setCurrent(target);
+    }
+
     window.googleTranslateElementInit = () => {
       if (window.google?.translate) {
         new window.google.translate.TranslateElement(
@@ -46,11 +77,12 @@ export function LanguageSwitcher() {
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const code = e.target.value;
-    const combo = document.querySelector<HTMLSelectElement>("#google_translate_element select");
-    if (combo) {
-      combo.value = code === "pt" ? "" : code;
-      combo.dispatchEvent(new Event("change"));
+    if (code === "pt") {
+      clearGoogTransCookie();
+    } else {
+      setGoogTransCookie(code);
     }
+    location.reload();
   }
 
   return (
@@ -62,7 +94,7 @@ export function LanguageSwitcher() {
       <div id="google_translate_element" className="hidden notranslate" translate="no" />
       <select
         onChange={handleChange}
-        defaultValue="pt"
+        value={current}
         aria-label="Traduzir página"
         translate="no"
         className="notranslate rounded border border-border bg-background px-2 py-1.5 text-xs"
