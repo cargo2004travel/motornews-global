@@ -16,12 +16,11 @@ declare global {
 
 const LANGUAGES = [
   { code: "pt", label: "Português" },
-  { code: "en", label: "English" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "es", label: "Español" },
-  { code: "it", label: "Italiano" },
-  { code: "zh-CN", label: "中文" },
+  { code: "en", label: "Inglês" },
+  { code: "es", label: "Espanhol" },
+  { code: "fr", label: "Francês" },
+  { code: "de", label: "Alemão" },
+  { code: "zh-CN", label: "Chinês" },
 ];
 
 /**
@@ -36,7 +35,7 @@ export function LanguageSwitcher() {
         new window.google.translate.TranslateElement(
           {
             pageLanguage: "pt",
-            includedLanguages: "en,fr,de,es,it,zh-CN",
+            includedLanguages: "en,fr,de,es,zh-CN",
             autoDisplay: false,
           },
           "google_translate_element",
