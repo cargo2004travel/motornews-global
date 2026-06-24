@@ -232,16 +232,14 @@ export async function runNewsImport(
 
   const totalImported = summaries.reduce((acc, s) => acc + s.imported, 0);
 
-  if (totalImported === 0) {
-    await randomizeFeaturedArticle();
-  }
+  await randomizeFeaturedArticle();
 
   return { summaries, totalImported };
 }
 
 /**
- * Quando um ciclo do cron não traz nenhuma notícia nova, evita que a home fique
- * sempre com a mesma manchete: sorteia uma notícia recente para ser o destaque.
+ * Sorteia uma notícia recente para ser a manchete da home a cada execução do
+ * cron (a cada 15 minutos), para a capa não ficar sempre com a mesma notícia.
  */
 async function randomizeFeaturedArticle(): Promise<void> {
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
