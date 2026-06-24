@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NAV_LINKS } from "@/config/site";
 import { SearchForm } from "@/components/search-form";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function SiteHeader() {
   return (
@@ -19,6 +20,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <SearchForm className="hidden md:block" />
           <Link
             href="/newsletter"

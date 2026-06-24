@@ -49,3 +49,16 @@ h1, h2, h3, .font-headline {
   -webkit-line-clamp: 3;
   overflow: hidden;
 }
+
+/* Esconde a barra/banner que o widget do Google Translate injeta no topo. */
+.goog-te-banner-frame,
+.skiptranslate > iframe {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+  position: static !important;
+}
+#google_translate_element {
+  display: none;
+}
