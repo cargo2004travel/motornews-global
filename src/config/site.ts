@@ -18,6 +18,7 @@ export const NAV_LINKS = [
 export const FOOTER_LINKS = [
   { label: "Sobre", href: "/sobre" },
   { label: "Política editorial", href: "/politica-editorial" },
+  { label: "Política de Privacidade", href: "/privacidade" },
   { label: "Fontes", href: "/fontes" },
   { label: "Contato", href: "/contato" },
   { label: "Newsletter", href: "/newsletter" },

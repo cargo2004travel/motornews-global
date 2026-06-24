@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatRelative } from "@/lib/format";
 import { toSlug } from "@/config/taxonomy";
+import { CategoryFallback } from "@/components/category-fallback";
 import type { ArticleCard as ArticleCardData } from "@/lib/articles";
 
 /**
@@ -20,12 +21,18 @@ export function ArticleCard({
   if (size === "compact") {
     return (
       <Link href={`/noticias/${article.slug}`} className="flex gap-3 group">
-        {article.imageUrl && (
+        {article.imageUrl ? (
           <img
             src={article.imageUrl}
             alt=""
             loading="lazy"
             className="h-16 w-24 flex-shrink-0 rounded object-cover"
+          />
+        ) : (
+          <CategoryFallback
+            category={article.category}
+            textSize="text-[10px]"
+            className="h-16 w-24 flex-shrink-0 rounded"
           />
         )}
         <div>
@@ -41,13 +48,15 @@ export function ArticleCard({
   if (size === "large") {
     return (
       <Link href={`/noticias/${article.slug}`} className="group block">
-        {article.imageUrl && (
+        {article.imageUrl ? (
           <img
             src={article.imageUrl}
             alt=""
             loading="lazy"
             className="aspect-[16/9] w-full rounded object-cover"
           />
+        ) : (
+          <CategoryFallback category={article.category} textSize="text-xl" className="aspect-[16/9] w-full rounded" />
         )}
         <span className="mt-3 inline-block rounded bg-accent-red px-2 py-0.5 text-xs font-bold uppercase text-white">
           {article.category}
@@ -66,13 +75,15 @@ export function ArticleCard({
   return (
     <div className="group">
       <Link href={`/noticias/${article.slug}`}>
-        {article.imageUrl && (
+        {article.imageUrl ? (
           <img
             src={article.imageUrl}
             alt=""
             loading="lazy"
             className="aspect-[16/10] w-full rounded object-cover"
           />
+        ) : (
+          <CategoryFallback category={article.category} className="aspect-[16/10] w-full rounded" />
         )}
       </Link>
       <Link
