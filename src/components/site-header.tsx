@@ -11,9 +11,13 @@ export function SiteHeader() {
           Motor<span className="text-accent-red">News</span> Global
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium lg:flex">
+        <nav className="hidden items-center gap-4 text-xs font-medium lg:flex xl:gap-5 xl:text-sm">
           {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-accent-red transition-colors">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="whitespace-nowrap hover:text-accent-red transition-colors"
+            >
               {link.label}
             </Link>
           ))}
