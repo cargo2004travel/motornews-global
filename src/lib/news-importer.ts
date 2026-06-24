@@ -122,6 +122,11 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
         url: originalUrl,
       });
 
+      if (!ai.isRelevant) {
+        summary.skipped += 1;
+        return;
+      }
+
       let imageUrl: string | null =
         (item.enclosure?.url as string | undefined) ??
         ((item as Record<string, unknown>)["media:content"] as { $: { url?: string } } | undefined)?.$?.url ??
@@ -226,5 +231,32 @@ export async function runNewsImport(
   summaries.push(...results);
 
   const totalImported = summaries.reduce((acc, s) => acc + s.imported, 0);
+
+  if (totalImported === 0) {
+    await randomizeFeaturedArticle();
+  }
+
   return { summaries, totalImported };
+}
+
+/**
+ * Quando um ciclo do cron não traz nenhuma notícia nova, evita que a home fique
+ * sempre com a mesma manchete: sorteia uma notícia recente para ser o destaque.
+ */
+async function randomizeFeaturedArticle(): Promise<void> {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const count = await prisma.article.count({ where: { status: "PUBLISHED", publishedAt: { gte: since } } });
+  if (count === 0) return;
+
+  const skip = Math.floor(Math.random() * count);
+  const [randomArticle] = await prisma.article.findMany({
+    where: { status: "PUBLISHED", publishedAt: { gte: since } },
+    select: { id: true },
+    skip,
+    take: 1,
+  });
+  if (!randomArticle) return;
+
+  await prisma.article.updateMany({ where: { featured: true }, data: { featured: false } });
+  await prisma.article.update({ where: { id: randomArticle.id }, data: { featured: true } });
 }
