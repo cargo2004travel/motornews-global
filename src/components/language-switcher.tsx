@@ -59,15 +59,16 @@ export function LanguageSwitcher() {
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
         strategy="afterInteractive"
       />
-      <div id="google_translate_element" className="hidden" />
+      <div id="google_translate_element" className="hidden notranslate" translate="no" />
       <select
         onChange={handleChange}
         defaultValue="pt"
         aria-label="Traduzir página"
-        className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+        translate="no"
+        className="notranslate rounded border border-border bg-background px-2 py-1.5 text-xs"
       >
         {LANGUAGES.map((lang) => (
-          <option key={lang.code} value={lang.code}>
+          <option key={lang.code} value={lang.code} className="notranslate">
             {lang.label}
           </option>
         ))}

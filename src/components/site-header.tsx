@@ -2,12 +2,14 @@ import Link from "next/link";
 import { NAV_LINKS } from "@/config/site";
 import { SearchForm } from "@/components/search-form";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { LogoMark } from "@/components/logo-mark";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-8">
-        <Link href="/" className="font-headline text-2xl font-bold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-headline text-2xl font-bold tracking-tight">
+          <LogoMark className="h-8 w-8" />
           Motor<span className="text-accent-red">News</span> Global
         </Link>
 
