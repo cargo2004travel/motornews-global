@@ -4,7 +4,8 @@ import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { sources, type SourceConfig } from "@/config/sources";
 import { processArticleWithAi } from "@/lib/ai";
-import { extractOgImage } from "@/lib/extract-image";
+import { extractOgImage, getHomepageDefaultImage } from "@/lib/extract-image";
+import { getCategoryStockPhoto } from "@/lib/stock-photo";
 
 const parser = new Parser({
   timeout: 10000,
@@ -126,7 +127,12 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
         ((item as Record<string, unknown>)["media:content"] as { $: { url?: string } } | undefined)?.$?.url ??
         null;
       if (!imageUrl) {
-        imageUrl = await extractOgImage(originalUrl);
+        const ogImage = await extractOgImage(originalUrl);
+        const homepageDefault = await getHomepageDefaultImage(config.url);
+        imageUrl = ogImage && ogImage !== homepageDefault ? ogImage : null;
+      }
+      if (!imageUrl) {
+        imageUrl = await getCategoryStockPhoto(ai.category);
       }
 
       const created = await prisma.article.create({
