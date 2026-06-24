@@ -118,7 +118,7 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
         sourceName: config.name,
         sourceCountry: config.country,
         language: config.language,
-        excerpt: excerptSource.slice(0, 1200),
+        excerpt: excerptSource.slice(0, 2500),
         url: originalUrl,
       });
 

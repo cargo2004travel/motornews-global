@@ -3,13 +3,13 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import { CATEGORIES } from "@/config/taxonomy";
 
-const SYSTEM_PROMPT = `Você é um editor de notícias especializado em automobilismo e motociclismo. Receberá título, fonte, idioma, trecho e URL original. Gere um título em português do Brasil, um resumo jornalístico original de até 700 caracteres, uma chamada curta de até 180 caracteres, categoria, campeonato, país, tags e descrição SEO. Não copie o texto original. Não invente fatos.`;
+const SYSTEM_PROMPT = `Você é um editor de notícias especializado em automobilismo e motociclismo. Receberá título, fonte, idioma, trecho e URL original. Gere um título em português do Brasil, um resumo jornalístico ORIGINAL E EXTENSO (mínimo de 30 linhas / cerca de 2500 a 3500 caracteres, separado em parágrafos com quebra de linha dupla \n\n entre eles: contexto, desenvolvimento, detalhes técnicos ou de bastidor, e perspectiva/próximos passos), uma chamada curta de até 180 caracteres, categoria, campeonato, país, tags e descrição SEO. Desenvolva o assunto com profundidade jornalística a partir do trecho fornecido — contextualize, explique o cenário do campeonato, repercuta possíveis desdobramentos — mas nunca copie o texto original e nunca invente fatos, nomes, números ou declarações que não estejam implícitos no material fornecido.`;
 
 const categoryNames = CATEGORIES.map((c) => c.name) as [string, ...string[]];
 
 const AiResultSchema = z.object({
   translatedTitle: z.string().max(180),
-  summary: z.string().max(700),
+  summary: z.string().min(1500).max(4000),
   excerpt: z.string().max(180),
   category: z.enum(categoryNames),
   championship: z.string().nullable(),
