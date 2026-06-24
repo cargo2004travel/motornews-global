@@ -58,6 +58,9 @@ const directSources: SourceConfig[] = [
   { name: "RaceFans", url: "https://www.racefans.net", rssUrl: "https://www.racefans.net/feed/", country: "Reino Unido", language: "en", category: "Fórmula 1", kind: "direct", active: true },
   { name: "Speedcafe", url: "https://www.speedcafe.com", rssUrl: "https://www.speedcafe.com/feed/", country: "Austrália", language: "en", category: "Turismo", kind: "direct", active: true },
   { name: "NASCAR.com", url: "https://www.nascar.com", rssUrl: "https://www.nascar.com/feed/", country: "Estados Unidos", language: "en", category: "Nascar", kind: "direct", active: true },
+  { name: "Asphalt & Rubber", url: "https://www.asphaltandrubber.com", rssUrl: "https://www.asphaltandrubber.com/feed/", country: "Estados Unidos", language: "en", category: "MotoGP", kind: "direct", active: true },
+  { name: "Road Racing World", url: "https://www.roadracingworld.com", rssUrl: "https://www.roadracingworld.com/feed/", country: "Estados Unidos", language: "en", category: "Superbike", kind: "direct", active: true },
+  { name: "Motocross Action Magazine", url: "https://motocrossactionmag.com", rssUrl: "https://motocrossactionmag.com/feed/", country: "Estados Unidos", language: "en", category: "Motocross", kind: "direct", active: true },
 ];
 
 /** Cobertura por categoria via Google News (preenche campeonatos sem RSS direto estável). */
@@ -76,11 +79,12 @@ const categoryQueries: { category: string; query: string }[] = [
   { category: "Porsche Cup", query: "Porsche Cup Carrera Cup" },
   { category: "Kart", query: "kartismo karting championship" },
   { category: "Motociclismo", query: "motociclismo motorcycle racing" },
+  { category: "MotoGP", query: "MotoGP Grand Prix motorcycle" },
   { category: "Moto2", query: "Moto2 championship" },
   { category: "Moto3", query: "Moto3 championship" },
   { category: "Superbike", query: "WorldSBK Superbike championship" },
   { category: "Motocross", query: "motocross MXGP championship" },
-  { category: "Enduro", query: "enduro motorcycle championship" },
+  { category: "Enduro", query: "enduro motorcycle championship rally" },
   { category: "Arrancada", query: "arrancada drag racing carro" },
   { category: "Dragster", query: "dragster NHRA drag racing" },
   { category: "Fórmula E", query: "Formula E championship" },

@@ -62,7 +62,10 @@ export async function getArticlesByCategory(category: string, limit = 8) {
 export async function getPaginatedByChampionship(championshipQuery: string, page = 1, pageSize = 18) {
   const where = {
     status: PUBLISHED,
-    championship: { contains: championshipQuery, mode: "insensitive" as const },
+    OR: [
+      { category: championshipQuery },
+      { championship: { contains: championshipQuery, mode: "insensitive" as const } },
+    ],
   };
   const [items, total] = await Promise.all([
     prisma.article.findMany({
