@@ -30,11 +30,28 @@ export interface RawArticleInput {
   url: string;
 }
 
+/**
+ * Usa a OpenRouter (compatível com a API da OpenAI) como provedor padrão, já que
+ * permite trocar de modelo/billing sem mudar código. Cai para a OpenAI direta se
+ * só OPENAI_API_KEY estiver configurada.
+ */
+const AI_MODEL = process.env.OPENROUTER_API_KEY ? "openai/gpt-4o-mini" : "gpt-4o-mini";
+
 let client: OpenAI | null = null;
 
 function getClient(): OpenAI {
+  if (process.env.OPENROUTER_API_KEY) {
+    if (!client) {
+      client = new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseURL: "https://openrouter.ai/api/v1",
+      });
+    }
+    return client;
+  }
+
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY não configurada");
+    throw new Error("Configure OPENROUTER_API_KEY ou OPENAI_API_KEY");
   }
   if (!client) {
     client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -46,7 +63,7 @@ export async function processArticleWithAi(input: RawArticleInput): Promise<AiRe
   const openai = getClient();
 
   const completion = await openai.chat.completions.parse({
-    model: "gpt-4o-mini",
+    model: AI_MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {

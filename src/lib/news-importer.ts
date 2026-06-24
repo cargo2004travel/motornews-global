@@ -20,6 +20,24 @@ function uniqueSlug(title: string, fallbackId: string): string {
   return base ? `${base}-${fallbackId.slice(-6)}` : fallbackId;
 }
 
+/** Roda `fn` sobre `items` com no máximo `concurrency` execuções simultâneas. */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await fn(items[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  return results;
+}
+
 interface ImportSummary {
   source: string;
   imported: number;
@@ -67,12 +85,12 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
 
   const items = (feed.items ?? []).slice(0, 15);
 
-  for (const item of items) {
+  await mapWithConcurrency(items, 5, async (item) => {
     const originalTitle = item.title?.trim();
     const originalUrl = item.link?.trim();
     if (!originalTitle || !originalUrl) {
       summary.skipped += 1;
-      continue;
+      return;
     }
 
     const hash = hashTitle(originalTitle);
@@ -83,7 +101,7 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
     });
     if (existing) {
       summary.skipped += 1;
-      continue;
+      return;
     }
 
     const excerptSource =
@@ -157,7 +175,7 @@ async function importFromSource(config: SourceConfig): Promise<ImportSummary> {
       summary.errors += 1;
       summary.errorDetail = err instanceof Error ? err.message : String(err);
     }
-  }
+  });
 
   return summary;
 }
@@ -183,9 +201,8 @@ export async function runNewsImport(
     targets = targets.slice(0, options.sourceLimit);
   }
 
-  for (const config of targets) {
+  const results = await mapWithConcurrency(targets, 6, async (config) => {
     const summary = await importFromSource(config);
-    summaries.push(summary);
 
     await prisma.importLog.create({
       data: {
@@ -197,7 +214,10 @@ export async function runNewsImport(
         finishedAt: new Date(),
       },
     });
-  }
+
+    return summary;
+  });
+  summaries.push(...results);
 
   const totalImported = summaries.reduce((acc, s) => acc + s.imported, 0);
   return { summaries, totalImported };

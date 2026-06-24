@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import { getFeaturedArticle, getLatestArticles, getArticlesByCategory } from "@/lib/articles";
 import { ArticleCard } from "@/components/article-card";
 import { Sidebar } from "@/components/sidebar";
 import { HOME_CHAMPIONSHIP_BLOCKS, toSlug } from "@/config/taxonomy";
 import { SITE_DESCRIPTION } from "@/config/site";
+import { AdSlot } from "@/components/ad-slot";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +17,12 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const featured = await getFeaturedArticle();
-  const latest = await getLatestArticles(9, featured?.id);
+  const latest = await getLatestArticles(21, featured?.id);
 
   const championshipBlocks = await Promise.all(
     HOME_CHAMPIONSHIP_BLOCKS.map(async (champ) => ({
       ...champ,
-      articles: await getArticlesByCategory(champ.name, 4),
+      articles: await getArticlesByCategory(champ.name, 6),
     })),
   );
 
@@ -50,6 +52,10 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <div className="mt-8">
+        <AdSlot slotId="1111111111" className="min-h-[90px]" />
+      </div>
+
       {/* Últimas notícias */}
       <section className="mt-12">
         <div className="flex items-center justify-between border-b border-border pb-2">
@@ -59,7 +65,7 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {latest.slice(3, 9).map((article) => (
+          {latest.slice(3, 21).map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
@@ -67,29 +73,35 @@ export default async function HomePage() {
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
         <div className="space-y-12">
-          {championshipBlocks.map((block) =>
+          {championshipBlocks.map((block, index) =>
             block.articles.length > 0 ? (
-              <section key={block.slug}>
-                <div className="flex items-center justify-between border-b border-border pb-2">
-                  <h2 className="font-headline text-xl font-bold">{block.name}</h2>
-                  <Link
-                    href={`/categoria/${toSlug(block.name)}`}
-                    className="text-sm font-semibold text-accent-blue hover:underline"
-                  >
-                    Ver todas →
-                  </Link>
-                </div>
-                <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
-                  {block.articles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
-                  ))}
-                </div>
-              </section>
+              <Fragment key={block.slug}>
+                <section>
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <h2 className="font-headline text-xl font-bold">{block.name}</h2>
+                    <Link
+                      href={`/categoria/${toSlug(block.name)}`}
+                      className="text-sm font-semibold text-accent-blue hover:underline"
+                    >
+                      Ver todas →
+                    </Link>
+                  </div>
+                  <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+                    {block.articles.map((article) => (
+                      <ArticleCard key={article.id} article={article} />
+                    ))}
+                  </div>
+                </section>
+                {index === 1 && <AdSlot slotId="2222222222" className="min-h-[200px]" />}
+              </Fragment>
             ) : null,
           )}
         </div>
 
-        <Sidebar />
+        <div className="space-y-8">
+          <AdSlot slotId="3333333333" className="min-h-[250px]" />
+          <Sidebar />
+        </div>
       </div>
     </div>
   );

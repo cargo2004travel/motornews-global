@@ -21,7 +21,7 @@
   --color-accent-yellow: var(--accent-yellow);
   --color-accent-blue: var(--accent-blue);
   --font-sans: var(--font-inter);
-  --font-headline: var(--font-source-serif);
+  --font-headline: var(--font-headline-sans);
 }
 
 body {
@@ -31,7 +31,9 @@ body {
 }
 
 h1, h2, h3, .font-headline {
-  font-family: var(--font-headline), Georgia, serif;
+  font-family: var(--font-headline), var(--font-sans), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .line-clamp-2 {
