@@ -13,20 +13,36 @@ Quando isRelevant for false, preencha os demais campos com valores mínimos gen�
 
 const categoryNames = CATEGORIES.map((c) => c.name) as [string, ...string[]];
 
+/**
+ * Sem limites de tamanho aqui de propósito: modelos diferentes (Gemini, GPT)
+ * variam na precisão de "maxLength" em saída estruturada. Truncamos os campos
+ * manualmente depois do parse em vez de rejeitar a resposta inteira por isso.
+ */
 const AiResultSchema = z.object({
   isRelevant: z.boolean(),
-  translatedTitle: z.string().max(180),
-  summary: z.string().min(20).max(4000),
-  excerpt: z.string().max(180),
+  translatedTitle: z.string(),
+  summary: z.string().min(20),
+  excerpt: z.string(),
   category: z.enum(categoryNames),
   championship: z.string().nullable(),
   country: z.string(),
-  tags: z.array(z.string()).max(6),
-  seoTitle: z.string().max(70),
-  seoDescription: z.string().max(160),
+  tags: z.array(z.string()).max(8),
+  seoTitle: z.string(),
+  seoDescription: z.string(),
 });
 
-export type AiResult = z.infer<typeof AiResultSchema>;
+export interface AiResult {
+  isRelevant: boolean;
+  translatedTitle: string;
+  summary: string;
+  excerpt: string;
+  category: (typeof categoryNames)[number];
+  championship: string | null;
+  country: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+}
 
 export interface RawArticleInput {
   title: string;
@@ -38,31 +54,41 @@ export interface RawArticleInput {
 }
 
 /**
- * Usa a OpenRouter (compatível com a API da OpenAI) como provedor padrão, já que
- * permite trocar de modelo/billing sem mudar código. Cai para a OpenAI direta se
- * só OPENAI_API_KEY estiver configurada.
+ * Provedor de IA: Gemini tem prioridade (via endpoint compatível com a API da
+ * OpenAI), depois OpenRouter, depois OpenAI direta — basta trocar a env var,
+ * sem mudar código.
  */
-const AI_MODEL = process.env.OPENROUTER_API_KEY ? "openai/gpt-4o-mini" : "gpt-4o-mini";
+const AI_MODEL = process.env.GEMINI_API_KEY
+  ? "gemini-2.5-flash"
+  : process.env.OPENROUTER_API_KEY
+    ? "openai/gpt-4o-mini"
+    : "gpt-4o-mini";
 
 let client: OpenAI | null = null;
 
 function getClient(): OpenAI {
+  if (client) return client;
+
+  if (process.env.GEMINI_API_KEY) {
+    client = new OpenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+    return client;
+  }
+
   if (process.env.OPENROUTER_API_KEY) {
-    if (!client) {
-      client = new OpenAI({
-        apiKey: process.env.OPENROUTER_API_KEY,
-        baseURL: "https://openrouter.ai/api/v1",
-      });
-    }
+    client = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: "https://openrouter.ai/api/v1",
+    });
     return client;
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error("Configure OPENROUTER_API_KEY ou OPENAI_API_KEY");
+    throw new Error("Configure GEMINI_API_KEY, OPENROUTER_API_KEY ou OPENAI_API_KEY");
   }
-  if (!client) {
-    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  }
+  client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   return client;
 }
 
@@ -93,5 +119,17 @@ export async function processArticleWithAi(input: RawArticleInput): Promise<AiRe
   if (!parsed) {
     throw new Error("IA não retornou um resultado válido");
   }
-  return parsed;
+
+  return {
+    isRelevant: parsed.isRelevant,
+    translatedTitle: parsed.translatedTitle.slice(0, 180),
+    summary: parsed.summary.slice(0, 6000),
+    excerpt: parsed.excerpt.slice(0, 180),
+    category: parsed.category,
+    championship: parsed.championship,
+    country: parsed.country,
+    tags: parsed.tags.slice(0, 6),
+    seoTitle: parsed.seoTitle.slice(0, 70),
+    seoDescription: parsed.seoDescription.slice(0, 160),
+  };
 }
