@@ -22,7 +22,8 @@ export function AdSlot({
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (!ADSENSE_CLIENT_ID || pushed.current) return;
+    const isPlaceholder = /^(.)\1+$/.test(slotId) || slotId === "1234567890" || !/^\d+$/.test(slotId);
+    if (!ADSENSE_CLIENT_ID || isPlaceholder || pushed.current) return;
     pushed.current = true;
     try {
       (window as unknown as { adsbygoogle?: unknown[] }).adsbygoogle ??= [];
@@ -30,9 +31,13 @@ export function AdSlot({
     } catch {
       // ignora erros de carregamento do AdSense (ex.: bloqueador de anúncios)
     }
-  }, []);
+  }, [slotId]);
 
-  if (!ADSENSE_CLIENT_ID) return null;
+  const isPlaceholder = /^(.)\1+$/.test(slotId) || slotId === "1234567890" || !/^\d+$/.test(slotId);
+
+  if (!ADSENSE_CLIENT_ID || isPlaceholder) {
+    return <div className={className} />;
+  }
 
   return (
     <ins
