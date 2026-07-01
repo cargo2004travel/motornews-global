@@ -46,10 +46,19 @@ export default function RootLayout({
       <head>
         {ADSENSE_CLIENT_ID && (
           <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-            crossOrigin="anonymous"
+            id="adsense-init"
             strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  var s = document.createElement('script');
+                  s.async = true;
+                  s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}";
+                  s.crossOrigin = "anonymous";
+                  document.head.appendChild(s);
+                })();
+              `,
+            }}
           />
         )}
       </head>
