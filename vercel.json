@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/fetch-news",
-      "schedule": "0 * * * *"
+      "schedule": "0 10-22/2 * * *"
     },
     {
       "path": "/api/cron/send-newsletter",
